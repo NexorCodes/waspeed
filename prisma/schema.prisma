@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WhiteLabel {
+  id           String  @id
+  checkout     String
+  tutorial     String
+  webhook      String
+  cor_primaria Int     @default(0)
+  banner       String? 
+  status       String  @default("ACTIVE")
+  install      String
+  uninstall    String
+  rewards      String
+  notifications Notification[]
+  users        User[]
+
+  @@map("white_labels")
+}
+
+model Notification {
+  id        String     @id @default(uuid())
+  wl_id     String
+  data      BigInt
+  title     String
+  viewer    String     // NOTIFY, INBOX
+  client    String     // ALL, PREMIUM
+  type      String     // INFO
+  statement String     @db.Text
+  link      String
+  btnName   String
+  whiteLabel WhiteLabel @relation(fields: [wl_id], references: [id])
+
+  @@map("notifications")
+}
+
+model User {
+  id        String     @id @default(uuid())
+  email     String     @unique
+  senha     String
+  nome      String
+  telefone  String
+  wl_id     String
+  whiteLabel WhiteLabel @relation(fields: [wl_id], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("users")
+}
+
+model ModeloCRM {
+  id        String     @id @default(uuid())
+  nome      String
+  arquivo   String
+  descricao String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("modelos_crm")
+} 
