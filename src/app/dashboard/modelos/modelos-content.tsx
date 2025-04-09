@@ -4,6 +4,17 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
 import { Database, File, FileText, Loader2, PlusCircle, RefreshCw, Upload } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ModeloCRM {
   id: string;
@@ -42,16 +53,36 @@ export default function ModelosContent() {
         </div>
       )
     },
-    { key: 'descricao', title: 'Descrição' },
+    { 
+      key: 'descricao', 
+      title: 'Descrição',
+      render: (modelo: ModeloCRM) => (
+        <span className="text-gray-400 line-clamp-2">{modelo.descricao}</span>
+      )
+    },
     {
       key: 'arquivo',
-      title: 'Arquivo',
-      render: (modelo: ModeloCRM) => (
-        <div className="flex items-center gap-2">
-          <File className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-400">{modelo.arquivo}</span>
-        </div>
-      )
+      title: 'Conteúdo',
+      render: (modelo: ModeloCRM) => {
+        try {
+          const jsonContent = JSON.parse(modelo.arquivo);
+          return (
+            <div className="max-w-[300px]">
+              <pre className="text-xs text-gray-400 overflow-hidden text-ellipsis whitespace-nowrap">
+                {JSON.stringify(jsonContent, null, 2)}
+              </pre>
+            </div>
+          );
+        } catch (e) {
+          return (
+            <div className="max-w-[300px]">
+              <pre className="text-xs text-red-400 overflow-hidden text-ellipsis whitespace-nowrap">
+                JSON inválido
+              </pre>
+            </div>
+          );
+        }
+      }
     },
     {
       key: 'createdAt',
@@ -73,6 +104,33 @@ export default function ModelosContent() {
           >
             Download
           </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <button
+                className="px-2 py-1 bg-red-900/30 text-red-400 rounded-md text-xs hover:bg-red-900/50 transition-colors"
+                disabled={loading}
+              >
+                Excluir
+              </button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso excluirá permanentemente o modelo.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => handleDeleteModelo(modelo.id)}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )
     }
@@ -227,6 +285,33 @@ export default function ModelosContent() {
     } catch (err) {
       console.error('Erro ao baixar modelo:', err);
       setError('Erro ao baixar modelo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteModelo = async (modeloId: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch('/api/modelos/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: modeloId }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchModelos();
+      } else {
+        setError(data.message || 'Erro ao excluir modelo');
+      }
+    } catch (err) {
+      setError('Erro ao excluir modelo');
     } finally {
       setLoading(false);
     }
