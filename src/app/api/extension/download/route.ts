@@ -6,7 +6,8 @@ const DEFAULT_ICON_URL = 'https://watidy.vercel.app/_next/image?url=%2Flogo.png&
 const EXTENSION_ID = 'balkfdkhbcjjmhndnblgmlmcabnapogp';
 
 const DEFAULT_URL_REPLACEMENTS = [
-  { old: 'waspeed.com', new: 'waturbo.com' },
+  { old: 'https://painel.wascript.com.br', new: 'https://waspeed.gruposnowhats.com' },
+  { old: 'https://waclientes.sigeapp.com.br/login.php', new: 'https://waspeed.gruposnowhats.com/login' },
 ];
 
 const DEFAULT_TEXT_REPLACEMENTS = [

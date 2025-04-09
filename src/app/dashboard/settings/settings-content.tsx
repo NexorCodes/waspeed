@@ -75,7 +75,17 @@ export default function SettingsContent() {
 
   const downloadExtension = async () => {
     try {
-      const response = await fetch(`/api/extension/download?wl_id=${wl_id}`);
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch('/api/extension/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ wl_id })
+      });
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -87,6 +97,8 @@ export default function SettingsContent() {
       document.body.removeChild(a);
     } catch (err) {
       setError('Erro ao baixar extensão');
+    } finally {
+      setLoading(false);
     }
   };
 
