@@ -18,6 +18,7 @@ interface JWTPayload {
   nome: string;
   telefone: string;
   wl_id: string;
+  expirationDate?: Date;
   iat?: number;
   exp?: number;
 }
@@ -60,6 +61,15 @@ export async function POST(request: NextRequest) {
       if (!user) {
         return NextResponse.json({
           error: {},
+          activeWL: true
+        });
+      }
+
+      if (user.expirationDate && new Date() > user.expirationDate) {
+        return NextResponse.json({
+          error: {
+            message: "Sua conta expirou. Entre em contato com o administrador."
+          },
           activeWL: true
         });
       }

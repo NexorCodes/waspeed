@@ -12,6 +12,7 @@ interface User {
   telefone: string;
   wl_id: string;
   createdAt: string;
+  expirationDate?: string;
 }
 
 export default function UsersContent() {
@@ -28,7 +29,8 @@ export default function UsersContent() {
     senha: '',
     nome: '',
     telefone: '',
-    wl_id: wl_id
+    wl_id: wl_id,
+    expirationDate: ''
   });
 
   const columns = [
@@ -41,6 +43,15 @@ export default function UsersContent() {
       render: (user: User) => (
         <span className="text-gray-400">
           {new Date(user.createdAt).toLocaleDateString()}
+        </span>
+      )
+    },
+    {
+      key: 'expirationDate',
+      title: 'Expira em',
+      render: (user: User) => (
+        <span className="text-gray-400">
+          {user.expirationDate ? new Date(user.expirationDate).toLocaleDateString() : 'Não definido'}
         </span>
       )
     }
@@ -88,7 +99,7 @@ export default function UsersContent() {
       const data = await response.json();
       
       if (data.success) {
-        setNewUser({ email: '', senha: '', nome: '', telefone: '', wl_id });
+        setNewUser({ email: '', senha: '', nome: '', telefone: '', wl_id, expirationDate: '' });
         fetchUsers();
       } else {
         setError(data.message || 'Erro ao criar usuário');
@@ -213,6 +224,19 @@ export default function UsersContent() {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-400 block">Data de Expiração</label>
+                  <input
+                    type="date"
+                    value={newUser.expirationDate}
+                    onChange={(e) => setNewUser({ ...newUser, expirationDate: e.target.value })}
+                    className="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 
+                              text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/50 
+                              focus:border-transparent transition-shadow"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
                 </div>
               </div>
               

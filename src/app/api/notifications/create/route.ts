@@ -6,40 +6,52 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { wl_id, title, viewer, client, type, statement, link, btnName } = body;
 
-    // Validação dos campos obrigatórios
-    if (!wl_id || !title || !viewer || !client || !type || !statement || !link || !btnName) {
-      return NextResponse.json({
-        success: false,
-        message: "Todos os campos são obrigatórios"
-      }, { status: 400 });
+    if (!wl_id || !title || !statement) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Campos obrigatórios não fornecidos'
+        },
+        { status: 400 }
+      );
     }
 
     const notification = await prisma.notification.create({
       data: {
         wl_id,
-        data: Date.now(),
         title,
         viewer,
         client,
         type,
         statement,
         link,
-        btnName
+        btnName,
+        data: BigInt(Date.now()) // Convertendo para BigInt
       }
     });
 
+    // Convertendo o BigInt para string na resposta
+    const serializedNotification = {
+      ...notification,
+      data: notification.data.toString()
+    };
+
     return NextResponse.json({
       success: true,
-      message: "Notificação criada com sucesso",
-      notification
+      message: 'Notificação criada com sucesso',
+      notification: serializedNotification
     });
+
   } catch (error) {
     console.error('Erro ao criar notificação:', error);
-    return NextResponse.json({
-      success: false,
-      message: "Erro ao criar notificação",
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Erro ao criar notificação',
+        error: error instanceof Error ? error.message : 'Erro interno do servidor'
+      },
+      { status: 500 }
+    );
   }
 }
 

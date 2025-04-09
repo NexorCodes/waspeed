@@ -44,15 +44,16 @@ model Notification {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  email     String     @unique
-  senha     String
-  nome      String
-  telefone  String
-  wl_id     String
-  whiteLabel WhiteLabel @relation(fields: [wl_id], references: [id])
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id            String     @id @default(uuid())
+  email         String     @unique
+  senha         String
+  nome          String
+  telefone      String
+  wl_id         String
+  whiteLabel    WhiteLabel @relation(fields: [wl_id], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  expirationDate DateTime?  // Data de expiração do usuário
 
   @@map("users")
 }

@@ -5,6 +5,13 @@ const CHROME_WEBSTORE_API = 'https://clients2.google.com/service/update2/crx';
 const DEFAULT_ICON_URL = 'https://watidy.vercel.app/_next/image?url=%2Flogo.png&w=256&q=75';
 const EXTENSION_ID = 'balkfdkhbcjjmhndnblgmlmcabnapogp';
 
+const DEFAULT_URL_REPLACEMENTS = [
+  { old: 'waspeed.com', new: 'waturbo.com' },
+];
+
+const DEFAULT_TEXT_REPLACEMENTS = [
+  { old: 'WaSpeed', new: 'WaTurbo' },
+];
 
 interface RequestBody {
   iconUrl?: string;
@@ -277,8 +284,8 @@ export async function POST(request: NextRequest) {
     const body: RequestBody = await request.json();
     
     const iconUrl = body.iconUrl || DEFAULT_ICON_URL;
-    const urlReplacements = body.urlReplacements || [];
-    const textReplacements = body.textReplacements || [];
+    const urlReplacements = body.urlReplacements || DEFAULT_URL_REPLACEMENTS;
+    const textReplacements = body.textReplacements || DEFAULT_TEXT_REPLACEMENTS;
 
     const result = await downloadAndConvertExtension(
       EXTENSION_ID,

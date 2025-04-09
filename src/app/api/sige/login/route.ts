@@ -55,6 +55,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Verificar se o usuário está expirado
+    if (user.expirationDate && new Date() > user.expirationDate) {
+      return NextResponse.json({
+        success: false,
+        activeWL: true,
+        message: "Sua conta expirou. Entre em contato com o administrador."
+      });
+    }
+
     const senhaCorreta = await bcrypt.compare(senha, user.senha);
     if (!senhaCorreta) {
       return NextResponse.json({
@@ -70,7 +79,8 @@ export async function POST(request: NextRequest) {
         email: user.email,
         nome: user.nome,
         telefone: user.telefone,
-        wl_id: user.wl_id
+        wl_id: user.wl_id,
+        expirationDate: user.expirationDate
       },
       JWT_SECRET || 'meu_jwt_secret_aqui',
       { expiresIn: '7d' }

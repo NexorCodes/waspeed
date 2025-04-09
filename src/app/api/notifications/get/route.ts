@@ -7,10 +7,29 @@ export async function GET(request: NextRequest) {
     const wl_id = searchParams.get('wl_id');
 
     if (!wl_id) {
-      return NextResponse.json({
-        success: false,
-        message: "ID do White Label é obrigatório"
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'ID da white label não fornecido'
+        },
+        { status: 400 }
+      );
+    }
+
+    const whiteLabel = await prisma.whiteLabel.findUnique({
+      where: {
+        id: wl_id
+      }
+    });
+
+    if (!whiteLabel) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'White label não encontrada'
+        },
+        { status: 404 }
+      );
     }
 
     const notifications = await prisma.notification.findMany({
@@ -22,18 +41,27 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Convert BigInt to string for JSON serialization
+    const serializedNotifications = notifications.map(notification => ({
+      ...notification,
+      data: notification.data.toString()
+    }));
+
     return NextResponse.json({
       success: true,
-      message: "Notificações encontradas",
-      notifications
+      message: 'Notificações capturas',
+      notifications: serializedNotifications
     });
+
   } catch (error) {
     console.error('Erro ao buscar notificações:', error);
-    return NextResponse.json({
-      success: false,
-      message: "Erro ao buscar notificações",
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        message: error instanceof Error ? error.message : 'Erro interno do servidor'
+      },
+      { status: 500 }
+    );
   }
 }
 

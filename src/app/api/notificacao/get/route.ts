@@ -41,10 +41,16 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Convert BigInt to string for JSON serialization
+    const serializedNotifications = notifications.map(notification => ({
+      ...notification,
+      data: notification.data.toString()
+    }));
+
     return NextResponse.json({
       success: true,
       message: 'Notificações capturas',
-      notificacoes: notifications
+      notificacoes: serializedNotifications
     });
 
   } catch (error) {

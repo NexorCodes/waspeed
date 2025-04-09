@@ -13,9 +13,8 @@ export default function DashboardLayoutContent({
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const wl_id = searchParams.get('wl_id') || '1';
+  const wl_id = searchParams.get('wl_id') || 'balkfdkhbcjjmhndnblgmlmcabnapogp';
 
-  // Close sidebar on mobile automatically
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 1024) {

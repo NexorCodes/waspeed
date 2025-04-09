@@ -3,7 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { DataTable } from '@/components/ui/data-table';
-import { Bell, ChevronDown, Info, Loader2, MessageCircle, PlusCircle, RefreshCw, Send } from 'lucide-react';
+import { Bell, ChevronDown, Info, Loader2, MessageCircle, PlusCircle, RefreshCw, Send, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Notification {
   id: string;
@@ -23,6 +34,7 @@ export default function NotificationsContent() {
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [notificationToDelete, setNotificationToDelete] = useState<string | null>(null);
   const searchParams = useSearchParams();
   const wl_id = searchParams.get('wl_id') || '1';
 
@@ -93,6 +105,39 @@ export default function NotificationsContent() {
           {new Date(notification.data).toLocaleDateString()}
         </span>
       )
+    },
+    {
+      key: 'actions',
+      title: 'Ações',
+      render: (notification: Notification) => (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button
+              className="p-1.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-950/20 transition-colors"
+              disabled={loading}
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação não pode ser desfeita. Isso excluirá permanentemente a notificação.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteNotification(notification.id)}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Excluir
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )
     }
   ];
 
@@ -156,6 +201,30 @@ export default function NotificationsContent() {
       setError('Erro ao criar notificação');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteNotification = async (id: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch(`/api/notifications/delete?id=${id}&wl_id=${wl_id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        fetchNotifications();
+      } else {
+        setError(data.message || 'Erro ao deletar notificação');
+      }
+    } catch (err) {
+      setError('Erro ao deletar notificação');
+    } finally {
+      setLoading(false);
+      setNotificationToDelete(null);
     }
   };
 
