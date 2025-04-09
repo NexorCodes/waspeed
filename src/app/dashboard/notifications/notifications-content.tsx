@@ -55,10 +55,7 @@ export default function NotificationsContent() {
       title: 'Título',
       render: (notification: Notification) => (
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${
-            notification.type === 'INFO' ? 'bg-blue-500' :
-            notification.type === 'WARNING' ? 'bg-amber-500' : 'bg-red-500'
-          }`}></div>
+          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
           <span>{notification.title}</span>
         </div>
       )
@@ -67,10 +64,7 @@ export default function NotificationsContent() {
       key: 'type', 
       title: 'Tipo',
       render: (notification: Notification) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          notification.type === 'INFO' ? 'bg-blue-950/50 text-blue-400' :
-          notification.type === 'WARNING' ? 'bg-amber-950/50 text-amber-400' : 'bg-red-950/50 text-red-400'
-        }`}>
+        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-950/50 text-blue-400">
           {notification.type}
         </span>
       )
@@ -154,7 +148,8 @@ export default function NotificationsContent() {
       const data = await response.json();
       
       if (data.success) {
-        setNotifications(data.notifications);
+        // Filter only INFO type notifications
+        setNotifications(data.notifications.filter((n: Notification) => n.type === 'INFO'));
       } else {
         setError(data.message || 'Erro ao carregar notificações');
       }
@@ -209,8 +204,12 @@ export default function NotificationsContent() {
       setLoading(true);
       setError('');
       
-      const response = await fetch(`/api/notifications/delete?id=${id}&wl_id=${wl_id}`, {
-        method: 'DELETE',
+      const response = await fetch('/api/notifications/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
       });
       
       const data = await response.json();
@@ -218,56 +217,13 @@ export default function NotificationsContent() {
       if (data.success) {
         fetchNotifications();
       } else {
-        setError(data.message || 'Erro ao deletar notificação');
+        setError(data.message || 'Erro ao excluir notificação');
       }
     } catch (err) {
-      setError('Erro ao deletar notificação');
+      setError('Erro ao excluir notificação');
     } finally {
       setLoading(false);
-      setNotificationToDelete(null);
     }
-  };
-
-  // Preview card for notification
-  const NotificationPreview = () => {
-    const getColorByType = (type: string) => {
-      switch(type) {
-        case 'INFO': return 'bg-blue-600/20 border-blue-600/30 text-blue-400';
-        case 'WARNING': return 'bg-amber-600/20 border-amber-600/30 text-amber-400';
-        case 'ERROR': return 'bg-red-600/20 border-red-600/30 text-red-400';
-        default: return 'bg-blue-600/20 border-blue-600/30 text-blue-400';
-      }
-    };
-    
-    return (
-      <div className={`border rounded-lg p-4 ${getColorByType(newNotification.type)}`}>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2">
-            {newNotification.type === 'INFO' && <Info className="w-4 h-4" />}
-            {newNotification.type === 'WARNING' && <Info className="w-4 h-4" />}
-            {newNotification.type === 'ERROR' && <Info className="w-4 h-4" />}
-            <h3 className="font-medium">{newNotification.title || 'Título da notificação'}</h3>
-          </div>
-          <div className="text-xs rounded-full px-2 py-0.5 bg-white/10">
-            {newNotification.viewer}
-          </div>
-        </div>
-        <p className="mt-2 text-sm opacity-80">
-          {newNotification.statement || 'Conteúdo da notificação...'}
-        </p>
-        {newNotification.btnName && (
-          <div className="mt-3">
-            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium
-                        ${newNotification.type === 'INFO' ? 'bg-blue-600/30 text-blue-300' :
-                          newNotification.type === 'WARNING' ? 'bg-amber-600/30 text-amber-300' : 
-                          'bg-red-600/30 text-red-300'}`}>
-              {newNotification.btnName}
-              <ChevronDown className="w-3 h-3" />
-            </span>
-          </div>
-        )}
-      </div>
-    );
   };
 
   useEffect(() => {
@@ -304,13 +260,13 @@ export default function NotificationsContent() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Create Notification Form */}
-        <div className="lg:col-span-3 bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-xl overflow-hidden">
+      <div className="grid gap-6">
+        {/* Create Notification Card */}
+        <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-xl overflow-hidden">
           <div className="border-b border-gray-800/70 px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-blue-400" />
-              <h3 className="font-medium">Nova Notificação</h3>
+              <Bell className="h-5 w-5 text-blue-400" />
+              <h3 className="font-medium">Adicionar Nova Notificação</h3>
             </div>
             <div className="h-6 w-6 rounded-full bg-blue-600/20 flex items-center justify-center">
               <PlusCircle className="h-3.5 w-3.5 text-blue-500" />
@@ -319,8 +275,8 @@ export default function NotificationsContent() {
           
           <div className="p-6">
             <form onSubmit={createNotification} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2 md:col-span-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <label className="text-sm text-gray-400 block">Título</label>
                   <input
                     type="text"
@@ -335,17 +291,16 @@ export default function NotificationsContent() {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400 block">Tipo</label>
+                  <label className="text-sm text-gray-400 block">Visualização</label>
                   <select
-                    value={newNotification.type}
-                    onChange={(e) => setNewNotification({ ...newNotification, type: e.target.value })}
+                    value={newNotification.viewer}
+                    onChange={(e) => setNewNotification({ ...newNotification, viewer: e.target.value })}
                     className="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 
                               text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/50 
                               focus:border-transparent transition-shadow"
                   >
-                    <option value="INFO">Informação</option>
-                    <option value="WARNING">Aviso</option>
-                    <option value="ERROR">Erro</option>
+                    <option value="NOTIFY">Notificação</option>
+                    <option value="MESSAGE">Mensagem</option>
                   </select>
                 </div>
                 
@@ -359,39 +314,26 @@ export default function NotificationsContent() {
                               focus:border-transparent transition-shadow"
                   >
                     <option value="ALL">Todos</option>
-                    <option value="USER_ID">Usuário específico</option>
+                    <option value="SPECIFIC">Específico</option>
                   </select>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400 block">Visualização</label>
-                  <select
-                    value={newNotification.viewer}
-                    onChange={(e) => setNewNotification({ ...newNotification, viewer: e.target.value })}
-                    className="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 
-                              text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/50 
-                              focus:border-transparent transition-shadow"
-                  >
-                    <option value="NOTIFY">Notificação</option>
-                    <option value="POPUP">Popup</option>
-                  </select>
-                </div>
-                
-                <div className="space-y-2 md:col-span-3">
-                  <label className="text-sm text-gray-400 block">Conteúdo</label>
+                  <label className="text-sm text-gray-400 block">Mensagem</label>
                   <textarea
                     value={newNotification.statement}
                     onChange={(e) => setNewNotification({ ...newNotification, statement: e.target.value })}
-                    className="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 min-h-24
+                    className="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 
                               text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/50 
                               focus:border-transparent transition-shadow"
-                    placeholder="Conteúdo da notificação"
+                    placeholder="Mensagem da notificação"
                     required
+                    rows={3}
                   />
                 </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm text-gray-400 block">Link (opcional)</label>
+
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-400 block">Link</label>
                   <input
                     type="text"
                     value={newNotification.link}
@@ -402,9 +344,9 @@ export default function NotificationsContent() {
                     placeholder="https://exemplo.com"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-400 block">Nome do botão</label>
+                  <label className="text-sm text-gray-400 block">Nome do Botão</label>
                   <input
                     type="text"
                     value={newNotification.btnName}
@@ -412,87 +354,40 @@ export default function NotificationsContent() {
                     className="w-full bg-gray-800/60 border border-gray-700/50 rounded-lg px-3 py-2 
                               text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600/50 
                               focus:border-transparent transition-shadow"
-                    placeholder="Ver mais"
+                    placeholder="Clique aqui"
                   />
                 </div>
               </div>
-              
-              <div className="pt-2">
+
+              <div className="flex justify-end">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg
-                            font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600/50 
-                            focus:ring-offset-2 focus:ring-offset-gray-900
-                            disabled:bg-blue-800/50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 
+                            transition-colors disabled:opacity-50 disabled:pointer-events-none"
                 >
                   {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Enviando...</span>
-                    </>
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <>
-                      <Send className="h-4 w-4" />
-                      <span>Enviar Notificação</span>
-                    </>
+                    'Criar Notificação'
                   )}
                 </button>
               </div>
             </form>
           </div>
         </div>
-        
-        {/* Preview Card */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-xl overflow-hidden">
-            <div className="border-b border-gray-800/70 px-6 py-4">
-              <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-blue-400" />
-                <h3 className="font-medium">Pré-visualização</h3>
-              </div>
-            </div>
-            <div className="p-6">
-              <NotificationPreview />
-            </div>
+
+        {/* Notifications Table */}
+        <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-xl overflow-hidden">
+          <div className="border-b border-gray-800/70 px-6 py-4">
+            <h3 className="font-medium">Lista de Notificações</h3>
           </div>
-          
-          {/* Notifications Table Card */}
-          <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-800/50 rounded-xl shadow-xl overflow-hidden">
-            <div className="border-b border-gray-800/70 px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-blue-400" />
-                  <h3 className="font-medium">Notificações Recentes</h3>
-                </div>
-                <div className="text-sm text-gray-400">
-                  {notifications.length} {notifications.length === 1 ? 'notificação' : 'notificações'}
-                </div>
-              </div>
-            </div>
-            
-            {notifications.length > 0 ? (
-              <div className="p-0">
-                <DataTable columns={columns} data={notifications} />
-              </div>
-            ) : (
-              <div className="p-8 text-center">
-                {loading ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                    <p className="text-gray-400">Carregando notificações...</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-3">
-                    <Bell className="h-12 w-12 text-gray-700" />
-                    <p className="text-gray-400">Nenhuma notificação encontrada.</p>
-                    <p className="text-xs text-gray-500">
-                      Crie uma notificação para começar
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="p-6">
+            <DataTable
+              columns={columns}
+              data={notifications}
+              loading={loading}
+            />
           </div>
         </div>
       </div>

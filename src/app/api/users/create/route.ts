@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, senha, nome, telefone, wl_id } = body;
+    const { email, senha, nome, telefone, wl_id, expirationDate } = body;
 
     // Validação dos campos obrigatórios
     if (!email || !senha || !nome || !telefone || !wl_id) {
@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
         senha: hashedPassword,
         nome,
         telefone,
-        wl_id
+        wl_id,
+        expirationDate: expirationDate ? new Date(expirationDate) : null
       }
     });
 

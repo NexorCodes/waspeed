@@ -9,37 +9,32 @@ export async function GET(request: NextRequest) {
     if (!wl_id) {
       return NextResponse.json({
         success: false,
-        message: "ID do White Label é obrigatório"
+        message: 'ID do White Label é obrigatório'
       }, { status: 400 });
     }
 
-    const users = await prisma.user.findMany({
+    const whiteLabel = await prisma.whiteLabel.findUnique({
       where: {
-        wl_id: wl_id
-      },
-      select: {
-        id: true,
-        email: true,
-        nome: true,
-        telefone: true,
-        wl_id: true,
-        createdAt: true,
-        updatedAt: true,
-        expirationDate: true
+        id: wl_id
       }
     });
 
+    if (!whiteLabel) {
+      return NextResponse.json({
+        success: false,
+        message: 'White Label não encontrado'
+      }, { status: 404 });
+    }
+
     return NextResponse.json({
       success: true,
-      message: "Usuários encontrados",
-      users
+      whiteLabel
     });
   } catch (error) {
-    console.error('Erro ao buscar usuários:', error);
+    console.error('Erro ao buscar White Label:', error);
     return NextResponse.json({
       success: false,
-      message: "Erro ao buscar usuários",
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
+      message: 'Erro ao buscar White Label'
     }, { status: 500 });
   }
 }
