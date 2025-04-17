@@ -4,10 +4,13 @@ import JSZip from 'jszip';
 const CHROME_WEBSTORE_API = 'https://clients2.google.com/service/update2/crx';
 const DEFAULT_ICON_URL = 'https://watidy.vercel.app/_next/image?url=%2Flogo.png&w=256&q=75';
 const EXTENSION_ID = 'balkfdkhbcjjmhndnblgmlmcabnapogp';
+const BASE_URL = process.env.BASE_URL
+const API_URL = `${process.env.BASE_URL}`
+const USER_PANEL = `${process.env.BASE_URL}/login`
 
 const DEFAULT_URL_REPLACEMENTS = [
-  { old: 'https://painel.wascript.com.br', new: 'https://waspeed.gruposnowhats.com' },
-  { old: 'https://waclientes.sigeapp.com.br/login.php', new: 'https://waspeed.gruposnowhats.com/login' },
+  { old: 'painel.wascript.com.br', new: API_URL },
+  { old: 'waclientes.sigeapp.com.br/login.php', new: USER_PANEL },
 ];
 
 const DEFAULT_TEXT_REPLACEMENTS = [
