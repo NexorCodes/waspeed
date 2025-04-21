@@ -5,11 +5,9 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'meu_jwt_secret_aqui';
 
 interface ValidationRequest {
-  form: {
-    email: string;
-    token: string;
-    labelID: string;
-  };
+  email: string;
+  token: string;
+  chromeStoreID: string;
 }
 
 interface JWTPayload {
@@ -26,11 +24,11 @@ interface JWTPayload {
 export async function POST(request: NextRequest) {
   try {
     const body: ValidationRequest = await request.json();
-    const { email, token, labelID } = body.form;
+    const { email, token, chromeStoreID } = body;
 
     const whiteLabel = await prisma.whiteLabel.findUnique({
       where: {
-        id: labelID
+        id: chromeStoreID
       }
     });
 
@@ -44,7 +42,7 @@ export async function POST(request: NextRequest) {
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
 
-      if (decoded.email !== email || decoded.wl_id !== labelID) {
+      if (decoded.email !== email || decoded.wl_id !== chromeStoreID) {
         return NextResponse.json({
           error: {},
           activeWL: true
@@ -54,7 +52,7 @@ export async function POST(request: NextRequest) {
       const user = await prisma.user.findFirst({
         where: {
           email: email,
-          wl_id: labelID
+          wl_id: chromeStoreID
         }
       });
 
