@@ -6,21 +6,19 @@ import bcrypt from 'bcryptjs';
 const JWT_SECRET = process.env.JWT_SECRET;
 
 interface LoginRequest {
-  form: {
-    email: string;
-    senha: string;
-    labelID: string;
-  };
+  email: string;
+  senha: string;
+  chromeStoreID: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: LoginRequest = await request.json();
-    const { email, senha, labelID } = body.form;
+    const { email, senha, chromeStoreID } = body;
 
     const whiteLabel = await prisma.whiteLabel.findUnique({
       where: {
-        id: labelID
+        id: chromeStoreID
       }
     });
 
@@ -43,7 +41,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.findFirst({
       where: {
         email: email,
-        wl_id: labelID
+        wl_id: chromeStoreID
       }
     });
 
