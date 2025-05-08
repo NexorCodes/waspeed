@@ -72,17 +72,7 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      return NextResponse.json({
-        result: {
-          retorno: 1,
-          id_status: 1,
-          token: token,
-          id_white_label: "5",
-          white_label: "",
-          mensagem: "Logado com sucesso."
-        },
-        activeWL: true
-      });
+      return NextResponse.json({ success: true });
 
     } catch (err) {
       console.error('Erro na validação:', err);
